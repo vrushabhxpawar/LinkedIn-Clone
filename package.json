@@ -1,7 +1,7 @@
 {
   "name": "linkedin",
   "version": "1.0.0",
-  "main": "SERVER/src/server.js",
+  "main": "backend/src/server.js",
   "type": "module",
   "scripts": {
     "dev": "nodemon backend/src/server.js",
