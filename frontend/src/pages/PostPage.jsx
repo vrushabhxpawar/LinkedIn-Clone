@@ -2,7 +2,6 @@ import React from "react";
 import { useAuthUser } from "../hooks/useAuthUser.jsx";
 import { useQuery } from "@tanstack/react-query";
 import { axiosInstance } from "../lib/axios.js";
-import { Loader } from "lucide-react";
 import { useParams } from "react-router-dom";
 import Post from "../components/Post.jsx";
 import Sidebar from "../components/Sidebar.jsx";

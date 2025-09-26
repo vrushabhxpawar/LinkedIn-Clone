@@ -10,6 +10,8 @@ const app = express();
 const PORT = process.env.PORT;
 const __dirname = path.resolve();
 
+console.log("Serving static from:", path.join(__dirname, "client", "dist"));
+
 if (process.env.NODE_ENV !== "production") {
   app.use(
     cors({
@@ -34,10 +36,10 @@ import notificationRouter from "../routes/notification.routes.js";
 import connectionRouter from "../routes/connection.routes.js";
 
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "/CLIENT/dist")));
+  app.use(express.static(path.join(__dirname, "client", "dist")));
 
-  app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "CLIENT", "dist", "index.html"));
+  app.use("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
   });
 }
 
@@ -46,3 +48,5 @@ app.use("/api/users", userRouter);
 app.use("/api/post", postRouter);
 app.use("/api/notification", notificationRouter);
 app.use("/api/connection", connectionRouter);
+
+

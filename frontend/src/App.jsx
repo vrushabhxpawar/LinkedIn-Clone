@@ -11,7 +11,7 @@ import HomePage from "./pages/HomePage.jsx";
 import NotificationPage from "./pages/NotificationPage.jsx";
 import NetworkPage from "./pages/NetworkPage.jsx";
 import ProfilePage from "./pages/ProfilePage.jsx";
-import PostPage from "./pages/PostPage.jsx"
+import PostPage from "./pages/PostPage.jsx";
 
 function App() {
   const { authUser, isLoading } = useAuthUser();

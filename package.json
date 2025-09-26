@@ -4,9 +4,9 @@
   "main": "SERVER/src/server.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon SERVER/src/server.js",
-    "start" : "node SERVER/src/server.js",
-    "build" : "npm install && npm install --prefix CLIENT && npm run build --prefix CLIENT"
+    "dev": "nodemon backend/src/server.js",
+    "start" : "node backend/src/server.js",
+    "build" : "npm install && npm install --prefix frontend && npm run build --prefix frontend"
   },
   "keywords": [],
   "author": "",
