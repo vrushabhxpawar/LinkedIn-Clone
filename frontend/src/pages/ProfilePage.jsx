@@ -37,7 +37,7 @@ function ProfilePage() {
 
   if (isLoadingUserProfile || isPending) return null;
 
-  const isOwnProfile = authUser.user.username === userProfile.user.username;
+  const isOwnProfile = authUser?.user?.username === userProfile?.user?.username;
   const userData = isOwnProfile ? authUser.user : userProfile.user;
   
   const handleSave = (updatedData) => {

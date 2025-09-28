@@ -5,10 +5,14 @@ import { connectDB } from "../db/connectDB.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
 const app = express();
 const PORT = process.env.PORT;
-const __dirname = path.resolve();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 
 if (process.env.NODE_ENV !== "production") {
   app.use(
@@ -33,13 +37,15 @@ import postRouter from "../routes/post.routes.js";
 import notificationRouter from "../routes/notification.routes.js";
 import connectionRouter from "../routes/connection.routes.js";
 
-if( process.env.NODE_ENV === "production"){
-  app.use(express.static(path.join(__dirname, "../frontend/dist")));
+if (process.env.NODE_ENV === "production") {
+ app.use(express.static(path.join(__dirname, "../../frontend/dist")));
 
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/dist/index.html"));
-  })
+app.get(/.*/, (req, res) => {
+  res.sendFile(path.join(__dirname, "../../frontend/dist/index.html"));
+});
+
 }
+
 
 app.use("/api/auth", authRouter);
 app.use("/api/users", userRouter);
