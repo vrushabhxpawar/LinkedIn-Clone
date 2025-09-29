@@ -29,7 +29,7 @@ function ProfileHeader({ userData, onSave, isOwnProfile }) {
 
   const { data: connectionStatus, refetch: refetchConnectionStatus } = useQuery(
     {
-      queryKey: ["connectionStatus", userData._id],
+      queryKey: ["connectionStatus", userData?._id],
       queryFn: async () => {
         const res = await axiosInstance.get(
           `/connection/status/${userData._id}`
@@ -41,7 +41,7 @@ function ProfileHeader({ userData, onSave, isOwnProfile }) {
   );
 
   const isConnected = userData.connections.some(
-    (connection) => connection === authUser.user._id
+    (connection) => connection === authUser?.user?._id
   );
 
   const { mutate: sendConnectionReqMutation, isPending: sendingRequest } =

@@ -1,6 +1,5 @@
 import React from 'react'
 import Navbar from './Navbar.jsx'
-import { useQuery } from '@tanstack/react-query'
 
 function Layout({children}) {
 

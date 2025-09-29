@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { School, X } from "lucide-react";
 
+
 function EducationSection({ userData, onSave, isOwnProfile }) {
   const [isEditing, setIsEditing] = useState(false);
   const [educations, setEducations] = useState(userData.education || []);

@@ -8,7 +8,7 @@ function UserCard({ user }) {
   return (
     <div className="bg-white rounded-lg shadow p-4 flex flex-col items-center transition-all hover:shadow-md">
       <Link
-        to={`/profile/${user.username}`}
+        to={`/profile/${user?.username}`}
         className="flex flex-col items-center"
       >
         <img

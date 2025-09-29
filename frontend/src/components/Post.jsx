@@ -9,7 +9,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { axiosInstance } from "../lib/axios.js";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import toast, { useToasterStore } from "react-hot-toast";
 import { useAuthUser } from "../hooks/useAuthUser.jsx";

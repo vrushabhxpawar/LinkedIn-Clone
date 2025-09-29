@@ -16,7 +16,7 @@ import PostPage from "./pages/PostPage.jsx";
 function App() {
   const { authUser, isLoading } = useAuthUser();
 
-  if (isLoading) return null;
+  if (isLoading) return "loading";
   return (
     <Layout>
       <Routes>
