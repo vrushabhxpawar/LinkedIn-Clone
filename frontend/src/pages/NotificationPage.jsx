@@ -53,7 +53,7 @@ function NotificationPage() {
         return (
           <span>
             <Link
-              to={`/profile/${notification.relatedUser.username}`}
+              to={`/profile/${notification?.relatedUser?.username}`}
               className="font-bold"
             >
               {notification.relatedUser.name}
@@ -124,7 +124,7 @@ function NotificationPage() {
     const { mutate : markAsReadMutation } = useMutation({
       mutationFn : async(notificationId) => {
         const res = await axiosInstance.put(`/notification/${notificationId}/read`)
-        return res.json
+        return res.data
       },
       onSuccess : () => {
         queryClient.invalidateQueries({ queryKey: ["notifications"] });
@@ -134,7 +134,7 @@ function NotificationPage() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
       <div className="col-span-1 lg:col-span-1">
-        <Sidebar user={authUser.user} />
+        <Sidebar user={authUser?.user} />
       </div>
       <div className="col-span-1 lg:col-span-3">
         <div className="bg-white rounded-lg shadow p-6">

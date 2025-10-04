@@ -14,11 +14,21 @@ import {
 } from "lucide-react";
 
 function ProfileHeader({ userData, onSave, isOwnProfile }) {
+  const { authUser, isLoading: authLoading } = useAuthUser();
+  const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
   const [editedData, setEditedData] = useState({});
-  const { authUser } = useAuthUser();
-  const queryClient = useQueryClient();
 
+  // Show loader until both authUser and userData exist
+  if (authLoading || !authUser || !userData) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <Loader className="animate-spin" size={40} />
+      </div>
+    );
+  }
+
+  // React Query for connection requests
   const { data: connectionReqs } = useQuery({
     queryKey: ["connectionReqs"],
     queryFn: async () => {
@@ -27,65 +37,48 @@ function ProfileHeader({ userData, onSave, isOwnProfile }) {
     },
   });
 
-  const { data: connectionStatus, refetch: refetchConnectionStatus } = useQuery(
-    {
-      queryKey: ["connectionStatus", userData?._id],
-      queryFn: async () => {
-        const res = await axiosInstance.get(
-          `/connection/status/${userData._id}`
-        );
-        return res.data;
-      },
-      enabled: !isOwnProfile,
-    }
+  // Connection status for this user
+  const { data: connectionStatus, refetch: refetchConnectionStatus } = useQuery({
+    queryKey: ["connectionStatus", userData?._id],
+    queryFn: async () => {
+      const res = await axiosInstance.get(`/connection/status/${userData?._id}`);
+      return res.data;
+    },
+    enabled: !isOwnProfile && !!userData?._id,
+  });
+
+  const isConnected = userData?.connections?.some(
+    (conn) => conn === authUser?.user?._id
   );
 
-  const isConnected = userData.connections.some(
-    (connection) => connection === authUser?.user?._id
-  );
+  // Mutations
+  const { mutate: sendConnectionReqMutation, isPending: sendingRequest } = useMutation({
+    mutationFn: async (userId) => {
+      const res = await axiosInstance.post(`/connection/request/${userId}`);
+      return res.data;
+    },
+    onSuccess: () => {
+      toast.success("Connection request sent");
+      refetchConnectionStatus();
+      queryClient.invalidateQueries({ queryKey: ["connectionReqs"] });
+    },
+    onError: (err) => toast.error(err?.response?.data?.message || "An error occurred"),
+  });
 
-  const { mutate: sendConnectionReqMutation, isPending: sendingRequest } =
-    useMutation({
-      mutationFn: async (userId) => {
-        const res = await axiosInstance.post(`/connection/request/${userId}`);
-        return res.data;
-      },
-      onSuccess: () => {
-        toast.success("Connection request sent");
-        refetchConnectionStatus();
-        queryClient.invalidateQueries({
-          queryKey: ["connectionReqs"],
-        });
-      },
-      onError: (err) => {
-        toast.error(err?.response?.data?.message || "An error occured");
-      },
-    });
-
-  const {
-    mutate: acceptConnectionReqMutation,
-    isPending: acceptingConnection,
-  } = useMutation({
+  const { mutate: acceptConnectionReqMutation, isPending: acceptingConnection } = useMutation({
     mutationFn: async (requestId) => {
       const res = await axiosInstance.put(`/connection/accept/${requestId}`);
       return res.data;
     },
     onSuccess: () => {
-      toast.success(`Your are connected to ${userData.fullname}`);
+      toast.success(`You are connected to ${userData?.fullname}`);
       refetchConnectionStatus();
-      queryClient.invalidateQueries({
-        queryKey: ["connectionReqs"],
-      });
+      queryClient.invalidateQueries({ queryKey: ["connectionReqs"] });
     },
-    onError: (err) => {
-      toast.error(err?.response?.data?.message || "An error occured");
-    },
+    onError: (err) => toast.error(err?.response?.data?.message || "An error occurred"),
   });
 
-  const {
-    mutate: rejectConnectionReqMutation,
-    isPending: rejectingConnection,
-  } = useMutation({
+  const { mutate: rejectConnectionReqMutation, isPending: rejectingConnection } = useMutation({
     mutationFn: async (requestId) => {
       const res = await axiosInstance.put(`/connection/reject/${requestId}`);
       return res.data;
@@ -93,28 +86,21 @@ function ProfileHeader({ userData, onSave, isOwnProfile }) {
     onSuccess: () => {
       toast.success("Connection request rejected");
       refetchConnectionStatus();
-      queryClient.invalidateQueries({
-        queryKey: ["connectionReqs"],
-      });
+      queryClient.invalidateQueries({ queryKey: ["connectionReqs"] });
     },
   });
 
-  const { mutate: removeConnectionMutation, isPending: removingConnection } =
-    useMutation({
-      mutationFn: async (userId) => {
-        const res = await axiosInstance.put(`/connection/${userId}`);
-        return res.data;
-      },
-      onSuccess: () => {
-        refetchConnectionStatus();
-        queryClient.invalidateQueries({
-          queryKey: ["connectionReqs"],
-        });
-        queryClient.invalidateQueries({
-          queryKey : ["connectionStatus"]
-        })
-      },
-    });
+  const { mutate: removeConnectionMutation, isPending: removingConnection } = useMutation({
+    mutationFn: async (userId) => {
+      const res = await axiosInstance.put(`/connection/${userId}`);
+      return res.data;
+    },
+    onSuccess: () => {
+      refetchConnectionStatus();
+      queryClient.invalidateQueries({ queryKey: ["connectionReqs"] });
+      queryClient.invalidateQueries({ queryKey: ["connectionStatus"] });
+    },
+  });
 
   const getConnectionStatus = () => {
     if (isConnected) return "connected";
@@ -130,19 +116,14 @@ function ProfileHeader({ userData, onSave, isOwnProfile }) {
         return (
           <div className="flex gap-2 justify-center">
             <div className={`${baseClass} bg-green-500 hover:bg-green-600`}>
-              <UserCheck size={20} className="mr-2" />
-              Connected
+              <UserCheck size={20} className="mr-2" /> Connected
             </div>
             <button
               className={`${baseClass} bg-red-500 hover:bg-red-600`}
-              onClick={() => removeConnectionMutation(userData._id)}
+              onClick={() => removeConnectionMutation(userData?._id)}
             >
               <X size={20} className="mr-2" />
-              {removingConnection ? (
-                <Loader className="animate-spin" size={20} />
-              ) : (
-                "Remove"
-              )}
+              {removingConnection ? <Loader className="animate-spin" size={20} /> : "Remove"}
             </button>
           </div>
         );
@@ -150,8 +131,7 @@ function ProfileHeader({ userData, onSave, isOwnProfile }) {
       case "pending":
         return (
           <button className={`${baseClass} bg-yellow-500 hover:bg-yellow-600`}>
-            <Clock size={20} className="mr-2" />
-            Pending
+            <Clock size={20} className="mr-2" /> Pending
           </button>
         );
 
@@ -159,39 +139,28 @@ function ProfileHeader({ userData, onSave, isOwnProfile }) {
         return (
           <div className="flex gap-2 justify-center">
             <button
-              onClick={() =>
-                acceptConnectionReqMutation(connectionStatus?.requestId)
-              }
+              onClick={() => acceptConnectionReqMutation(connectionStatus?.requestId)}
               className={`${baseClass} bg-green-500 hover:bg-green-600`}
             >
               {acceptingConnection ? <Loader /> : "Accept"}
             </button>
             <button
-              onClick={() =>
-                rejectConnectionReqMutation(connectionStatus?.requestId)
-              }
+              onClick={() => rejectConnectionReqMutation(connectionStatus?.requestId)}
               className={`${baseClass} bg-red-500 hover:bg-red-600`}
             >
-              {rejectingConnection ? (
-                <Loader className="animate-spin" size={20} />
-              ) : (
-                "Reject"
-              )}
+              {rejectingConnection ? <Loader className="animate-spin" size={20} /> : "Reject"}
             </button>
           </div>
         );
+
       default:
         return (
           <button
-            onClick={() => sendConnectionReqMutation(userData._id)}
+            onClick={() => sendConnectionReqMutation(userData?._id)}
             className="bg-primary hover:bg-primary-dark text-white py-2 px-4 rounded-full transition duration-300 flex items-center justify-center"
           >
             <UserPlus size={20} className="mr-2" />
-            {sendingRequest ? (
-              <Loader className="animate-spin" size={20} />
-            ) : (
-              "Connect"
-            )}
+            {sendingRequest ? <Loader className="animate-spin" size={20} /> : "Connect"}
           </button>
         );
     }
@@ -199,13 +168,13 @@ function ProfileHeader({ userData, onSave, isOwnProfile }) {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setEditedData((prev) => ({ ...prev, [e.target.name]: reader.result }));
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setEditedData((prev) => ({ ...prev, [e.target.name]: reader.result }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSave = () => {
@@ -215,75 +184,59 @@ function ProfileHeader({ userData, onSave, isOwnProfile }) {
 
   return (
     <div className="bg-white shadow rounded-lg mb-6">
+      {/* Banner */}
       <div
         className="relative h-48 rounded-t-lg bg-cover bg-center"
         style={{
-          backgroundImage: `url('${
-            editedData.bannerImg || userData.bannerImg || "/banner.png"
-          }')`,
+          backgroundImage: `url('${editedData.bannerImg || userData?.bannerImg || "/banner.png"}')`,
         }}
       >
         {isEditing && (
           <label className="absolute top-2 right-2 bg-white p-2 rounded-full shadow cursor-pointer">
             <Camera size={20} />
-            <input
-              type="file"
-              className="hidden"
-              name="bannerImg"
-              onChange={handleImageChange}
-              accept="image/*"
-            />
+            <input type="file" className="hidden" name="bannerImg" onChange={handleImageChange} accept="image/*" />
           </label>
         )}
       </div>
 
       <div className="p-4">
+        {/* Profile Picture */}
         <div className="relative -mt-20 mb-4">
           <img
             className="w-32 h-32 rounded-full mx-auto object-cover"
-            src={editedData.profilePic || userData.profilePic || "/avatar.png"}
-            alt={userData.fullname}
+            src={editedData.profilePic || userData?.profilePic || "/avatar.png"}
+            alt={userData?.fullname || "User"}
           />
-
           {isEditing && (
             <label className="absolute bottom-0 right-1/2 transform translate-x-16 bg-white p-2 rounded-full shadow cursor-pointer">
               <Camera size={20} />
-              <input
-                type="file"
-                className="hidden"
-                name="profilePic"
-                onChange={handleImageChange}
-                accept="image/*"
-              />
+              <input type="file" className="hidden" name="profilePic" onChange={handleImageChange} accept="image/*" />
             </label>
           )}
         </div>
 
+        {/* Name, Headline, Location */}
         <div className="text-center mb-4">
           {isEditing ? (
             <input
               type="text"
-              value={editedData.fullname ?? userData.fullname}
-              onChange={(e) =>
-                setEditedData({ ...editedData, fullname: e.target.value })
-              }
+              value={editedData.fullname ?? userData?.fullname ?? ""}
+              onChange={(e) => setEditedData({ ...editedData, fullname: e.target.value })}
               className="text-2xl font-bold mb-2 text-center w-full"
             />
           ) : (
-            <h1 className="text-2xl font-bold mb-2">{userData.fullname}</h1>
+            <h1 className="text-2xl font-bold mb-2">{userData?.fullname}</h1>
           )}
 
           {isEditing ? (
             <input
               type="text"
-              value={editedData.headline ?? userData.headline}
-              onChange={(e) =>
-                setEditedData({ ...editedData, headline: e.target.value })
-              }
+              value={editedData.headline ?? userData?.headline ?? ""}
+              onChange={(e) => setEditedData({ ...editedData, headline: e.target.value })}
               className="text-gray-600 text-center w-full"
             />
           ) : (
-            <p className="text-gray-600">{userData.headline}</p>
+            <p className="text-gray-600">{userData?.headline}</p>
           )}
 
           <div className="flex justify-center items-center mt-2">
@@ -291,32 +244,29 @@ function ProfileHeader({ userData, onSave, isOwnProfile }) {
             {isEditing ? (
               <input
                 type="text"
-                value={editedData.location ?? userData.location}
-                onChange={(e) =>
-                  setEditedData({ ...editedData, location: e.target.value })
-                }
+                value={editedData.location ?? userData?.location ?? ""}
+                onChange={(e) => setEditedData({ ...editedData, location: e.target.value })}
                 className="text-gray-600 text-center"
               />
             ) : (
-              <span className="text-gray-600">{userData.location}</span>
+              <span className="text-gray-600">{userData?.location}</span>
             )}
           </div>
         </div>
 
+        {/* Buttons */}
         {isOwnProfile ? (
           isEditing ? (
             <button
-              className="w-full bg-primary text-white py-2 px-4 rounded-full hover:bg-primary-dark
-							 transition duration-300"
               onClick={handleSave}
+              className="w-full bg-primary text-white py-2 px-4 rounded-full hover:bg-primary-dark transition duration-300"
             >
               Save Profile
             </button>
           ) : (
             <button
               onClick={() => setIsEditing(true)}
-              className="w-full bg-primary text-white py-2 px-4 rounded-full hover:bg-primary-dark
-							 transition duration-300"
+              className="w-full bg-primary text-white py-2 px-4 rounded-full hover:bg-primary-dark transition duration-300"
             >
               Edit Profile
             </button>

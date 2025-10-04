@@ -3,6 +3,6 @@ import axios from "axios"
 const baseURL = import.meta.N
 
 export const axiosInstance = axios.create({
-  baseURL : "https://linkedin-clone-backend-ijhj.onrender.com/",
+  baseURL : "http://localhost:3000/api",
   withCredentials : true
 })

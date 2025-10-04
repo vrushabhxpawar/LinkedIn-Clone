@@ -23,8 +23,8 @@ function Post({ post }) {
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [comments, setComments] = useState(post.comments || []);
-  const isOwner = authUser.user._id === post.author._id;
-  const isLiked = post.likes.includes(authUser.user._id);
+  const isOwner = authUser?.user?._id === post?.author?._id;
+  const isLiked = post?.likes?.includes(authUser?.user?._id);
 
   const { mutate: deletePostMutation, isPending: isDeletingPost } = useMutation(
     {
@@ -118,9 +118,9 @@ function Post({ post }) {
 
             <div>
               <Link to={`/profile/${post?.author?.username}`}>
-                <h3 className="font-semibold">{post.author.fullname}</h3>
+                <h3 className="font-semibold">{post?.author?.fullname}</h3>
               </Link>
-              <p className="text-xs text-info">{post.author.headline}</p>
+              <p className="text-xs text-info">{post?.author?.headline}</p>
               <p className="text-xs text-info">
                 {formatDistanceToNow(new Date(post.createdAt), {
                   addSuffix: true,
@@ -141,7 +141,7 @@ function Post({ post }) {
             </button>
           )}
         </div>
-        <p className="mb-4">{post.content}</p>
+        <p className="mb-4">{post?.content}</p>
         {post.image && (
           <img
             src={post.image}
@@ -158,7 +158,7 @@ function Post({ post }) {
                 className={isLiked ? "text-blue-500  fill-blue-300" : ""}
               />
             }
-            text={`Like (${post.likes.length})`}
+            text={`Like (${post?.likes?.length})`}
             onClick={handleLikePost}
           />
 

@@ -29,7 +29,7 @@ function NetworkPage() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
       <div className="col-span-1 lg:col-span-1">
-        <Sidebar user={authUser.user} />
+        <Sidebar user={authUser?.user} />
       </div>
       <div className="col-span-1 lg:col-span-3">
         <div className="bg-stone-50 rounded-lg shadow p-6 mb-6">
