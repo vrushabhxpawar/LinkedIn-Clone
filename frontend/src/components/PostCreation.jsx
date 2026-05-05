@@ -78,8 +78,8 @@ function PostCreation({ user }) {
     <div className="rounded-lg shadow mb-4 p-4">
       <div className="flex space-x-3">
         <img
-          src={user.profilePic || "/avatar.png"}
-          alt={user.fullname}
+          src={user?.profilePic || "/avatar.png"}
+          alt={user?.fullname}
           className="size-12 rounded-full"
         />
         <textarea

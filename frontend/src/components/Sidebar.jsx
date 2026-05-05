@@ -8,18 +8,18 @@ export default function Sidebar({ user }) {
 				<div
 					className='h-16 rounded-t-lg bg-cover bg-center'
 					style={{
-						backgroundImage: `url("${user.bannerImg || "/banner.png"}")`,
+						backgroundImage: `url("${user?.bannerImg || "/banner.png"}")`,
 					}}
 				/>
-				<Link to={`/profile/${user.username}`}>
+				<Link to={`/profile/${user?.username}`}>
 					<img
-						src={user.profilePic || "/avatar.png"}
-						alt={user.fullname}
+						src={user?.profilePic || "/avatar.png"}
+						alt={user?.fullname}
 						className='w-20 h-20 rounded-full mx-auto mt-[-40px]'
 					/>
-					<h2 className='text-xl font-semibold mt-2'>{user.fullname}</h2>
+					<h2 className='text-xl font-semibold mt-2'>{user?.fullname}</h2>
 				</Link>
-				<p className='text-info'>{user.headline}</p>
+				<p className='text-info'>{user?.headline}</p>
 				<p className='text-info text-xs'>{user?.connections?.length} connections</p>
 			</div>
 			<div className='border-t border-base-100 p-4'>
@@ -53,7 +53,7 @@ export default function Sidebar({ user }) {
 				</nav>
 			</div>
 			<div className='border-t border-base-100 p-4'>
-				<Link to={`/profile/${user.username}`} className='text-sm font-semibold'>
+				<Link to={`/profile/${user?.username}`} className='text-sm font-semibold'>
 					Visit your profile
 				</Link>
 			</div>

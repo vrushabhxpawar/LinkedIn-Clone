@@ -31,7 +31,7 @@ const Navbar = () => {
     enabled: !!authUser,
   });
 
-  const { mutate: logoutMutation, isLoading } = useMutation({
+  const { mutate: logoutMutation } = useMutation({
     mutationFn: async () => {
       const res = await axiosInstance.post("/auth/logout");
       return res.data;
@@ -100,7 +100,7 @@ const Navbar = () => {
                   )}
                 </Link>
                 <Link
-                  to={`/profile/${authUser.user.username}`}
+                  to={`/profile/${authUser.user?.username}`}
                   className="text-neutral flex flex-col items-center"
                 >
                   <User size={20} />
